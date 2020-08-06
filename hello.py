@@ -1,6 +1,7 @@
-from flask import Flask, redirect  #, url_for
-import urllib.parse
+from flask import Flask, redirect, request  #, url_for
 import os
+import urllib.parse
+import requests as ex_requests
 app = Flask(__name__)
 
 
@@ -31,3 +32,43 @@ def start_oauth():
 
     # do redirect
     return redirect(auth_base_url)
+
+
+@app.route('/callback', methods=["GET", "POST"])
+def callback_oauth():
+
+    # log incoming request
+    print(request.method)  # "POST"
+    print(request.args)  # access url params ?key=123 eg: request.args.get("key", ""))
+    print(request.form)  # access form data posted to this endpoint, eg: request.form["user"]
+
+    # read values from env vars
+    l_code = 111111  # TODO get code from request
+    l_client_id = os.getenv("OAUTH_CLIENT_ID", "12345")  # from dev portal
+    l_client_secret = os.getenv("OAUTH_CLIENT_SECRET", "12345")  # from dev portal
+    l_redirect_url = os.getenv("REDIRECT_URL", "http://localhost")  # url for callback (this server), case sensitive and must match value registered on dev portal
+
+    # create request from vars
+    l_dict = {"grant_type": "authorization_code", "code": l_code, "client_id": l_client_id, "client_secret": l_client_secret, "redirect_url": l_redirect_url}
+    auth_token_url = "https://www.bungie.net/platform/app/oauth/token"
+
+    # do post request to get token
+    m_access_token = ""
+    m_resp = ex_requests.post(auth_token_url, data=l_dict)  # post data as x-www-form-urlencoded
+    if m_resp.status_code == ex_requests.codes.ok:
+        print("Post was successful!")
+        full_json_body = m_resp.json()
+        print(full_json_body)
+        # extract token from response
+        m_access_token = full_json_body["access_token"]
+
+        # extract refresh token from response
+        m_refresh_token = full_json_body["refresh_token"]
+        # TODO save refresh token to db
+        # ...
+    else:
+        print("Res:"+m_resp.text)
+        return "Error couldn\'t get access token"
+
+    # return token
+    return "Access token: "+m_access_token
