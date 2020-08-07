@@ -42,8 +42,10 @@ def callback_oauth():
     print(request.args)  # access url params ?key=123 eg: request.args.get("key", ""))
     print(request.form)  # access form data posted to this endpoint, eg: request.form["user"]
 
-    # read values from env vars
+    # read values from url params
     l_code = request.args.get("code", "0")  # get code from request
+    l_state = request.args.get("state", "111111")  # get state from request, is same value that was set on /start'
+    # read values from env vars
     l_client_id = os.getenv("OAUTH_CLIENT_ID", "12345")  # from dev portal
     l_client_secret = os.getenv("OAUTH_CLIENT_SECRET", "12345")  # from dev portal
     l_redirect_url = os.getenv("REDIRECT_URL", "http://localhost")  # url for callback (this server), case sensitive and must match value registered on dev portal
@@ -72,3 +74,10 @@ def callback_oauth():
 
     # return token
     return "Access token: "+m_access_token
+
+
+@app.route('/refresh', methods=["GET", "POST"])
+def refresh_oauth():
+
+    return "Under construction!"
+
