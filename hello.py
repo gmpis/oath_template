@@ -38,12 +38,12 @@ def start_oauth():
 def callback_oauth():
 
     # log incoming request
-    print(request.method)  # "POST"
+    print(request.method)  # "GET", "POST"
     print(request.args)  # access url params ?key=123 eg: request.args.get("key", ""))
     print(request.form)  # access form data posted to this endpoint, eg: request.form["user"]
 
     # read values from env vars
-    l_code = 111111  # TODO get code from request
+    l_code = request.args.get("code", "0")  # get code from request
     l_client_id = os.getenv("OAUTH_CLIENT_ID", "12345")  # from dev portal
     l_client_secret = os.getenv("OAUTH_CLIENT_SECRET", "12345")  # from dev portal
     l_redirect_url = os.getenv("REDIRECT_URL", "http://localhost")  # url for callback (this server), case sensitive and must match value registered on dev portal
