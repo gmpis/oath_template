@@ -4,6 +4,7 @@ import urllib.parse
 import requests as ex_requests
 import redis
 import time
+import json
 
 
 m_db_conn = ""  # connection to db, init to empty
@@ -83,13 +84,26 @@ def callback_oauth():
         print("Post was successful!")
         full_json_body = m_resp.json()
         print(full_json_body)
+        print(type(full_json_body))
+
         # extract token from response
         m_access_token = full_json_body["access_token"]
 
         # extract refresh token from response
         m_refresh_token = full_json_body["refresh_token"]
-        # TODO save refresh token to db
-        # ...
+
+        # save refresh token to db
+        if l_use_db:
+            l_db_key = l_state  # TODO SOS check key_name (input) before saving to db, to avoid attacks
+
+            tmp_curr_millisec = int(time.time()) * 1000  # current time in milliseconds, (since Epoch)
+            tmp_u_json = full_json_body
+            tmp_u_json["w_rec_time"] = str(tmp_curr_millisec)  # millisec the token was generated / received
+            tmp_db_value = json.dumps(tmp_u_json)
+            print(tmp_db_value)
+            print(type(tmp_db_value))
+
+            m_db_conn.set(l_db_key, tmp_db_value)  # store user token to db
     else:
         print("Res:"+m_resp.text)
         return "Error couldn\'t get access token"
