@@ -2,6 +2,19 @@ from flask import Flask, redirect, request  #, url_for
 import os
 import urllib.parse
 import requests as ex_requests
+
+
+m_db_conn = ""  # connection to db, init to empty
+l_use_db = os.getenv("USE_DB", "")  # defaults to empty, dont store any resp on db
+if l_use_db:
+    # for more control change to: if l_use_db == "True":
+    l_db_host = os.getenv("DB_HOST", "localhost")  # db host
+    l_db_port = os.getenv("DB_PORT", "6379")    # db port
+    # l_db_user = os.getenv("DB_USER", "")      # db username
+    l_db_pass = os.getenv("DB_PASS", "")        # db password
+    print("Connecting to db ...")
+    # m_db_conn = ....
+
 app = Flask(__name__)
 
 
