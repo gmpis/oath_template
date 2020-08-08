@@ -2,6 +2,8 @@ from flask import Flask, redirect, request  #, url_for
 import os
 import urllib.parse
 import requests as ex_requests
+import redis
+import time
 
 
 m_db_conn = ""  # connection to db, init to empty
@@ -12,8 +14,15 @@ if l_use_db:
     l_db_port = os.getenv("DB_PORT", "6379")    # db port
     # l_db_user = os.getenv("DB_USER", "")      # db username
     l_db_pass = os.getenv("DB_PASS", "")        # db password
+    # end config
+
     print("Connecting to db ...")
-    # m_db_conn = ....
+    m_db_conn = redis.Redis(host=l_db_host, port=l_db_port, password=l_db_pass)
+
+    # test db connection
+    l_curr_millisec = int(time.time()) * 1000  # current time in milliseconds, (since Epoch)
+    m_db_conn.set("last_conn", l_curr_millisec)  # log most recent connection
+
 
 app = Flask(__name__)
 
