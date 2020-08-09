@@ -124,9 +124,43 @@ def refresh_oauth(db_key):
             resp_dec = json.loads(resp_str)  # class 'dict'
 
             # extract refresh token
-            # ...
+            prev_refresh_token = resp_dec["refresh_token"]
+            # print(prev_refresh_token)
+            # return resp_str
 
-            return resp_str
+            # read values from env vars
+            l_client_id = os.getenv("OAUTH_CLIENT_ID", "12345")  # from dev portal
+            l_client_secret = os.getenv("OAUTH_CLIENT_SECRET", "12345")  # from dev portal
+
+            # create request from vars
+            l_dict = {"grant_type": "refresh_token", "refresh_token": prev_refresh_token, "client_id": l_client_id, "client_secret": l_client_secret}
+            l_headers = {"Content-Type": "application/x-www-form-urlencoded"}
+            auth_token_url = "https://www.bungie.net/platform/app/oauth/token"
+
+            # do post request to refresh token
+            m_resp = ex_requests.post(auth_token_url, headers=l_headers, data=l_dict)  # post data as x-www-form-urlencoded
+            if m_resp.status_code == ex_requests.codes.ok:
+                print("(Refresh) Post was successful!")
+                full_json_body = m_resp.json()
+                print("After: " + str(full_json_body))
+                # print(type(full_json_body))  # class dict
+
+                # extract token from response
+                m_access_token = full_json_body["access_token"]
+
+                # save refresh token to db, checked for db usage at the beginning
+                tmp_curr_millisec = int(time.time()) * 1000  # current time in milliseconds, (since Epoch)
+                tmp_u_json = full_json_body
+                tmp_u_json["w_refred_time"] = str(tmp_curr_millisec)  # millisec the token was generated / received
+                tmp_db_value = json.dumps(tmp_u_json)
+                # print(tmp_db_value)  # class string
+
+                m_db_conn.set(db_key, tmp_db_value)  # store user token to db
+                return tmp_db_value
+            else:
+                print("Error, status: " + str(m_resp.status_code) + " with body: " + m_resp.text)
+                return "Error Couldn\'t refresh token received status : %s" % m_resp.status_code
+
         else:
             # TODO SOS check input before returning, reflection vuln
             return "Couldn\'t find: %s" % db_key
