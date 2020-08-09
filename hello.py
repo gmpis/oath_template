@@ -84,7 +84,7 @@ def callback_oauth():
         print("Post was successful!")
         full_json_body = m_resp.json()
         print(full_json_body)
-        print(type(full_json_body))
+        # print(type(full_json_body))  # class dict
 
         # extract token from response
         m_access_token = full_json_body["access_token"]
@@ -100,8 +100,7 @@ def callback_oauth():
             tmp_u_json = full_json_body
             tmp_u_json["w_rec_time"] = str(tmp_curr_millisec)  # millisec the token was generated / received
             tmp_db_value = json.dumps(tmp_u_json)
-            print(tmp_db_value)
-            print(type(tmp_db_value))
+            # print(tmp_db_value)  # class string
 
             m_db_conn.set(l_db_key, tmp_db_value)  # store user token to db
     else:
@@ -112,8 +111,10 @@ def callback_oauth():
     return "Access token: "+m_access_token
 
 
-@app.route('/refresh', methods=["GET", "POST"])
-def refresh_oauth():
+@app.route('/refresh/<string:db_key>/', methods=["GET", "POST"])
+def refresh_oauth(db_key):
 
-    return "Under construction!"
-
+    if l_use_db:
+        return "Searching db for: %s" % db_key  # SOS check input before returning, reflection
+    else:
+        return "Under construction!"

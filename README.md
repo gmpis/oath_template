@@ -30,3 +30,7 @@ Now you can access the app using a web browser at http://127.0.0.1:5000/
 
 ## OR run the app using gunicorn:   
 `gunicorn -w 1 -b 127.0.0.1:5005 hello:app`  
+
+Note: *During development to auto restart the server when a file gets modified, start gunicorn with  ` --reload`*  
+
+Note: *gunicorn is included in the requirements.txt file.*  
