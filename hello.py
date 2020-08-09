@@ -115,6 +115,20 @@ def callback_oauth():
 def refresh_oauth(db_key):
 
     if l_use_db:
-        return "Searching db for: %s" % db_key  # SOS check input before returning, reflection
+        # TODO SOS check input before searching, vuln
+        resp_bytes = m_db_conn.get(db_key)  # search db for db_key, returns: class 'bytes'
+
+        if resp_bytes:  # TODO look again condition
+            # key exists and received valid response from db
+            resp_str = resp_bytes.decode("utf-8")  # class 'str', convert bytes to string
+            resp_dec = json.loads(resp_str)  # class 'dict'
+
+            # extract refresh token
+            # ...
+
+            return resp_str
+        else:
+            # TODO SOS check input before returning, reflection vuln
+            return "Couldn\'t find: %s" % db_key
     else:
         return "Under construction!"
